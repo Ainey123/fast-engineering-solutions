@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  // Base path config matching GitHub Pages repository naming convention in production
-  base: process.env.NODE_ENV === 'production' ? '/fast-engineering-solutions/' : '/'
+  // Relative base path ensures the app works perfectly on local, GitHub Pages, Vercel, or any other hosting provider without base route modifications.
+  base: './'
 });
