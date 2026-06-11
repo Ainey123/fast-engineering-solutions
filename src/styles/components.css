@@ -1,0 +1,345 @@
+/* Reusable CSS Component definitions */
+
+/* Header styles */
+.header-nav {
+  padding: 16px;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-nav-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background-color var(--transition-normal) ease, border-color var(--transition-normal) ease;
+}
+
+.header-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: all var(--transition-fast) ease;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-secondary {
+  background-color: var(--color-accent-blue-tint);
+  color: var(--color-primary);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: rgba(0, 102, 255, 0.15);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--color-input-border);
+  color: var(--color-text-primary);
+}
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: var(--color-text-on-primary);
+}
+.btn-danger:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Card styles */
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  border: 1px solid var(--color-surface-border);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal) ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0, 102, 255, 0.15);
+}
+
+/* Form controls */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--color-text-secondary);
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: var(--color-input-bg);
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.95rem;
+  transition: all var(--transition-fast) ease;
+}
+.form-control:focus {
+  border-color: var(--color-color-primary, var(--color-primary));
+  box-shadow: 0 0 0 3px var(--color-input-focus);
+}
+.form-control::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.form-feedback {
+  font-size: 0.775rem;
+  margin-top: 4px;
+  display: none;
+}
+.form-feedback.is-error {
+  color: var(--color-danger);
+  display: block;
+}
+.form-control.is-invalid {
+  border-color: var(--color-danger);
+}
+
+/* Floating navigation bar */
+.bottom-nav-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background-color: var(--color-nav-bg);
+  border-top: 1px solid var(--color-nav-border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 1000;
+  transition: background-color var(--transition-normal) ease, border-color var(--transition-normal) ease;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  gap: 4px;
+  transition: color var(--transition-fast) ease;
+  background: none;
+  border: none;
+}
+.nav-item.is-active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  transition: transform var(--transition-fast) ease;
+}
+.nav-item:active svg {
+  transform: scale(0.85);
+}
+
+/* Tab bar switchers (Sign in / Sign up) */
+.tab-switch {
+  display: flex;
+  border-bottom: 2px solid var(--color-surface-border);
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  flex: 1;
+  text-align: center;
+  padding: 14px 0;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  border: none;
+  background: none;
+  position: relative;
+  transition: color var(--transition-fast) ease;
+}
+
+.tab-btn.is-active {
+  color: var(--color-primary);
+}
+
+.tab-btn.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Light / Dark Mode Toggle button */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--radius-full);
+  transition: background-color var(--transition-fast) ease;
+}
+.theme-toggle-btn:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* Linear progress indicator */
+.linear-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin: 32px 0 16px;
+  padding: 0 8px;
+}
+.linear-stepper::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 32px;
+  right: 32px;
+  height: 3px;
+  background-color: var(--color-surface-border);
+  z-index: 1;
+}
+.linear-stepper-progress {
+  position: absolute;
+  top: 15px;
+  left: 32px;
+  width: 0%;
+  height: 3px;
+  background-color: var(--color-primary);
+  z-index: 2;
+  transition: width var(--transition-slow) ease;
+}
+.linear-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 3;
+  cursor: default;
+}
+.linear-step-indicator {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  border: 3px solid var(--color-surface-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-normal) ease;
+}
+.linear-step.is-active .linear-step-indicator {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-surface);
+  box-shadow: 0 0 10px rgba(0, 102, 255, 0.2);
+}
+.linear-step.is-completed .linear-step-indicator {
+  border-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  background-color: var(--color-primary);
+}
+.linear-step-label {
+  font-size: 0.725rem;
+  font-weight: 600;
+  margin-top: 8px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  max-width: 80px;
+}
+.linear-step.is-active .linear-step-label {
+  color: var(--color-primary);
+}
+.linear-step.is-completed .linear-step-label {
+  color: var(--color-text-primary);
+}
+
+/* Badge styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+}
+.badge-blue {
+  background-color: var(--color-accent-blue-tint);
+  color: var(--color-primary);
+}
+.badge-amber {
+  background-color: var(--color-accent-amber-tint);
+  color: var(--color-secondary-hover);
+  animation: pulse-amber 2s infinite;
+}
+.badge-red {
+  background-color: var(--color-accent-red-tint);
+  color: var(--color-danger);
+}
+.badge-green {
+  background-color: var(--color-accent-green-tint);
+  color: var(--color-success);
+}

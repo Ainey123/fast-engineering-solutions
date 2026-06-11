@@ -1,0 +1,89 @@
+/* Design system tokens & variable definitions */
+:root {
+  /* Common variables */
+  --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -1px rgba(0,0,0,0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-glow: 0 0 15px rgba(0, 102, 255, 0.3);
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --max-width: 480px; /* Lock to mobile view width on desktop for simulator feel */
+
+  /* Specific branding colors */
+  --color-primary: #0066FF; /* Tech Blue */
+  --color-primary-hover: #0052CC;
+  --color-secondary: #FFB000; /* Safety Amber */
+  --color-secondary-hover: #E09B00;
+  --color-danger: #FF3B30; /* SOS Red */
+  --color-danger-hover: #D62B20;
+  --color-success: #34C759; /* Green */
+  --color-success-hover: #28A745;
+  --color-info: #5856D6;
+
+  /* Theme-specific variables (Light Mode default) */
+  --color-bg-app: #E5E7EB; /* Background around the mobile frame on desktop */
+  --color-bg-page: #F8F9FA; /* Off-White page background */
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F1F3F5;
+  --color-surface-border: #E9ECEF;
+  
+  --color-text-primary: #1A1D20;
+  --color-text-secondary: #5A626A;
+  --color-text-tertiary: #8A929A;
+  --color-text-on-primary: #FFFFFF;
+  --color-text-on-secondary: #1A1D20;
+
+  --color-input-bg: #FFFFFF;
+  --color-input-border: #CED4DA;
+  --color-input-focus: rgba(0, 102, 255, 0.2);
+
+  --color-nav-bg: rgba(255, 255, 255, 0.85);
+  --color-nav-border: #E9ECEF;
+
+  --color-accent-blue-tint: rgba(0, 102, 255, 0.08);
+  --color-accent-amber-tint: rgba(255, 176, 0, 0.1);
+  --color-accent-red-tint: rgba(255, 59, 48, 0.15);
+  --color-accent-green-tint: rgba(52, 199, 89, 0.1);
+}
+
+/* Dark Mode values */
+[data-theme="dark"] {
+  --color-bg-app: #090B0E;
+  --color-bg-page: #0F1115; /* Slate Black */
+  --color-surface: #171A21;
+  --color-surface-hover: #212530;
+  --color-surface-border: #242936;
+
+  --color-text-primary: #F1F3F5;
+  --color-text-secondary: #A0AAB5;
+  --color-text-tertiary: #6C7A87;
+  --color-text-on-primary: #FFFFFF;
+  --color-text-on-secondary: #FFFFFF;
+
+  --color-input-bg: #1C202B;
+  --color-input-border: #2D3446;
+  --color-input-focus: rgba(0, 102, 255, 0.4);
+
+  --color-nav-bg: rgba(23, 26, 33, 0.85);
+  --color-nav-border: #242936;
+
+  --color-accent-blue-tint: rgba(0, 102, 255, 0.18);
+  --color-accent-amber-tint: rgba(255, 176, 0, 0.18);
+  --color-accent-red-tint: rgba(255, 59, 48, 0.25);
+  --color-accent-green-tint: rgba(52, 199, 89, 0.18);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.25), 0 2px 4px -1px rgba(0,0,0,0.15);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.35), 0 4px 6px -2px rgba(0,0,0,0.25);
+}
