@@ -30,37 +30,18 @@ html {
   height: -webkit-fill-available;
 }
 
-/* Mobile viewport simulator frame for Desktop */
 #app-simulator {
   width: 100%;
-  max-width: var(--max-width);
   height: 100vh;
-  max-height: 900px;
   background-color: var(--color-bg-page);
-  border-radius: var(--radius-xl);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
   position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 8px solid #1A1D20; /* Phone bezel */
-  transition: background-color var(--transition-normal) ease, border-color var(--transition-normal) ease;
+  transition: background-color var(--transition-normal) ease;
 }
 
-/* On mobile viewports, remove the bezel & fill the entire screen */
-@media (max-width: 500px) {
-  body {
-    background-color: var(--color-bg-page);
-  }
-  
-  #app-simulator {
-    max-width: 100%;
-    height: 100%;
-    max-height: 100vh;
-    border-radius: 0;
-    border: none;
-  }
-}
+/* Base resets & typography */
 
 /* Main content scrolling layer */
 .app-view-container {
