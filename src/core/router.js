@@ -60,6 +60,20 @@ class HashRouter {
       return;
     }
 
+    if (!state.authInitialized && state.onboardingComplete) {
+      // Wait for Firebase to determine auth state
+      if (this.container) {
+        this.container.innerHTML = `<div class="app-view-container no-scrollbar" style="display:flex;align-items:center;justify-content:center;height:100vh;"><div style="color:var(--color-text-tertiary);font-weight:600;">Authenticating...</div></div>`;
+      }
+      const unsub = store.subscribe('authInitialized', (isInit) => {
+        if (isInit) {
+          unsub();
+          this.handleRouting();
+        }
+      });
+      return;
+    }
+
     if (state.onboardingComplete && !state.user && hash !== '#/auth' && hash !== '#/onboarding') {
       // Must be authenticated to access app
       this.navigate('#/auth');

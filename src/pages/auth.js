@@ -2,6 +2,8 @@
 import { router } from '../core/router.js';
 import { store } from '../core/store.js';
 import { isValidEmail, isValidPassword } from '../core/utils.js';
+import { fbSignIn, fbSignUp, fbGoogleSignIn, db } from '../core/firebase.js';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default class AuthPage {
   constructor(params = {}) {
@@ -162,14 +164,23 @@ export default class AuthPage {
     this.formSignin.addEventListener('submit', (e) => this.handleSignInSubmit(e));
     this.formSignup.addEventListener('submit', (e) => this.handleSignUpSubmit(e));
 
-    // Google Sign-in Mock
-    this.googleBtn.addEventListener('click', () => {
+    // Google Sign-in
+    this.googleBtn.addEventListener('click', async () => {
       this.googleBtn.innerHTML = 'Connecting Google...';
       this.googleBtn.disabled = true;
-      setTimeout(() => {
-        store.login('google.user@gmail.com', 'Google User');
+      try {
+        const userCred = await fbGoogleSignIn();
+        await setDoc(doc(db, 'users', userCred.user.uid), {
+          name: userCred.user.displayName || userCred.user.email.split('@')[0],
+          email: userCred.user.email,
+          lastLoginAt: new Date().toISOString()
+        }, { merge: true });
         router.navigate('#/dashboard');
-      }, 1000);
+      } catch (err) {
+        alert('Google Sign-In failed: ' + err.message);
+        this.googleBtn.innerHTML = 'Sign in with Google';
+        this.googleBtn.disabled = false;
+      }
     });
 
     // Forgot password modal
@@ -239,7 +250,7 @@ export default class AuthPage {
     }
   }
 
-  handleSignInSubmit(e) {
+  async handleSignInSubmit(e) {
     e.preventDefault();
     const emailInput = document.getElementById('signin-email');
     const passwordInput = document.getElementById('signin-password');
@@ -267,12 +278,23 @@ export default class AuthPage {
     }
 
     if (isValid) {
-      store.login(emailInput.value);
-      router.navigate('#/dashboard');
+      const btn = this.formSignin.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Signing In...';
+      btn.disabled = true;
+
+      try {
+        await fbSignIn(emailInput.value, passwordInput.value);
+        router.navigate('#/dashboard');
+      } catch (error) {
+        alert('Sign In Failed: ' + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     }
   }
 
-  handleSignUpSubmit(e) {
+  async handleSignUpSubmit(e) {
     e.preventDefault();
     const nameInput = document.getElementById('signup-name');
     const emailInput = document.getElementById('signup-email');
@@ -323,8 +345,24 @@ export default class AuthPage {
     }
 
     if (isValid) {
-      store.login(emailInput.value, nameInput.value);
-      router.navigate('#/dashboard');
+      const btn = this.formSignup.querySelector('button[type="submit"]');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = 'Creating Account...';
+      btn.disabled = true;
+
+      try {
+        const userCredential = await fbSignUp(emailInput.value, passwordInput.value);
+        await setDoc(doc(db, 'users', userCredential.user.uid), {
+          name: nameInput.value,
+          email: emailInput.value,
+          createdAt: new Date().toISOString()
+        });
+        router.navigate('#/dashboard');
+      } catch (error) {
+        alert('Sign Up Failed: ' + error.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     }
   }
 }
