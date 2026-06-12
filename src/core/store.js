@@ -22,44 +22,54 @@ class GlobalStore {
 
   initAuthListener() {
     onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // Fetch user role from Firestore
-        let role = 'client';
-        try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            role = userDoc.data().role || 'client';
+      try {
+        if (firebaseUser) {
+          // Fetch user role from Firestore
+          let role = 'client';
+          try {
+            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+            if (userDoc.exists()) {
+              role = userDoc.data().role || 'client';
+            }
+          } catch (e) {
+            console.warn('Could not fetch user role:', e);
           }
-        } catch (e) {
-          console.warn('Could not fetch user role:', e);
+
+          const safeEmail = firebaseUser.email || '';
+          const namePrefix = safeEmail.includes('@') ? safeEmail.split('@')[0] : 'User';
+
+          const userPayload = {
+            uid: firebaseUser.uid,
+            email: safeEmail,
+            name: firebaseUser.displayName || namePrefix,
+            photoURL: firebaseUser.photoURL,
+            role
+          };
+
+          this.setState('userRole', role);
+          this.setState('user', userPayload);
+
+          // Only listen to bookings for clients
+          if (role === 'client') {
+            this.initBookingsListener(firebaseUser.uid);
+          }
+        } else {
+          this.setState('user', null);
+          this.setState('userRole', null);
+          this.setState('bookings', []);
+
+          if (this.unsubBookings) {
+            this.unsubBookings();
+            this.unsubBookings = null;
+          }
         }
-
-        const userPayload = {
-          uid: firebaseUser.uid,
-          email: firebaseUser.email,
-          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
-          photoURL: firebaseUser.photoURL,
-          role
-        };
-
-        this.setState('userRole', role);
-        this.setState('user', userPayload);
-        this.setState('authInitialized', true);
-
-        // Only listen to bookings for clients
-        if (role === 'client') {
-          this.initBookingsListener(firebaseUser.uid);
-        }
-      } else {
+      } catch (err) {
+        console.error('Auth state listener error:', err);
         this.setState('user', null);
         this.setState('userRole', null);
-        this.setState('bookings', []);
+      } finally {
+        // ALWAYS set authInitialized to true to unlock the router!
         this.setState('authInitialized', true);
-
-        if (this.unsubBookings) {
-          this.unsubBookings();
-          this.unsubBookings = null;
-        }
       }
     });
   }
