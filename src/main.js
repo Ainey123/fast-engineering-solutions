@@ -112,14 +112,20 @@ router.register('#/notifications', NotificationsPage);
 router.register('#/support', SupportPage);
 router.register('#/profile', ProfilePage);
 
-// Document load hook initialization
-document.addEventListener('DOMContentLoaded', () => {
+function initApp() {
   // Sync page wrapper
   const appContainer = document.getElementById('app');
-  if (appContainer) {
+  if (appContainer && !document.getElementById('app-simulator')) {
     appContainer.innerHTML = '<div id="app-simulator"></div>';
   }
   
   // Start the Router on the mobile simulator container
   router.init('app-simulator');
-});
+}
+
+// Document load hook initialization
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
