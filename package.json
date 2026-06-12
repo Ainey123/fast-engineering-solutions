@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "gh-pages": "^6.3.0",
-    "lucide": "^1.17.0"
+    "lucide": "^1.17.0",
+    "puppeteer": "^25.1.0"
   }
 }

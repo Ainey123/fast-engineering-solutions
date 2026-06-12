@@ -23,7 +23,7 @@ class HashRouter {
 
     this.routes.push({
       path,
-      regex: new RegExp(`^#${regexPattern}$`),
+      regex: new RegExp(`^${regexPattern}$`),
       paramNames,
       component: pageComponent
     });
