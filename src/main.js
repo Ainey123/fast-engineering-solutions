@@ -3,7 +3,7 @@ import './styles/index.css';
 import { router } from './core/router.js';
 import { store } from './core/store.js';
 
-// Import Pages
+// Import Client Pages
 import OnboardingPage from './pages/onboarding.js';
 import AuthPage from './pages/auth.js';
 import DashboardPage from './pages/dashboard.js';
@@ -13,6 +13,12 @@ import BookingsTrackerPage from './pages/bookings.js';
 import NotificationsPage from './pages/notifications.js';
 import SupportPage from './pages/support.js';
 import ProfilePage from './pages/profile.js';
+
+// Import Admin Pages
+import AdminDashboardPage from './pages/admin/admin-dashboard.js';
+import AdminBookingsPage from './pages/admin/admin-bookings.js';
+import AdminClientsPage from './pages/admin/admin-clients.js';
+import AdminAlertsPage from './pages/admin/admin-alerts.js';
 
 // Tree-shake and export only required Lucide Icons to optimize bundle size
 import {
@@ -26,6 +32,7 @@ import {
   ArrowRight,
   ShieldCheck,
   LogIn,
+  LogOut,
   Eye,
   EyeOff,
   X,
@@ -35,10 +42,13 @@ import {
   Home,
   Calendar,
   Phone,
+  PhoneCall,
   User,
+  Users,
   CalendarX,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Check,
   FileText,
@@ -47,61 +57,33 @@ import {
   Moon,
   Sun,
   Building2,
-  PhoneCall,
   MapPin,
   PackageSearch,
   BellOff,
   UploadCloud,
   Zap,
-  Route
+  Route,
+  ClipboardList,
+  Inbox,
+  Siren,
+  ShieldCheck as ShieldCheckIcon
 } from 'lucide';
 
 // Expose tree-shaken lucide globally for lifecycle re-render triggers
 window.lucide = {
   createIcons: () => createIcons({
     icons: {
-      Wrench,
-      Settings,
-      Activity,
-      AlertTriangle,
-      ArrowLeft,
-      MessageSquare,
-      ArrowRight,
-      ShieldCheck,
-      LogIn,
-      Eye,
-      EyeOff,
-      X,
-      UserPlus,
-      CheckCircle,
-      Bell,
-      Home,
-      Calendar,
-      Phone,
-      User,
-      CalendarX,
-      ChevronDown,
-      ChevronLeft,
-      ChevronUp,
-      Check,
-      FileText,
-      Trash2,
-      Mail,
-      Moon,
-      Sun,
-      Building2,
-      PhoneCall,
-      MapPin,
-      PackageSearch,
-      BellOff,
-      UploadCloud,
-      Zap,
-      Route
+      Wrench, Settings, Activity, AlertTriangle, ArrowLeft, MessageSquare, ArrowRight,
+      ShieldCheck, LogIn, LogOut, Eye, EyeOff, X, UserPlus, CheckCircle,
+      Bell, Home, Calendar, Phone, PhoneCall, User, Users, CalendarX,
+      ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Check, FileText, Trash2,
+      Mail, Moon, Sun, Building2, MapPin, PackageSearch, BellOff, UploadCloud,
+      Zap, Route, ClipboardList, Inbox, Siren
     }
   })
 };
 
-// Register SPA routes
+// Register Client SPA routes
 router.register('#/onboarding', OnboardingPage);
 router.register('#/auth', AuthPage);
 router.register('#/dashboard', DashboardPage);
@@ -111,6 +93,12 @@ router.register('#/bookings', BookingsTrackerPage);
 router.register('#/notifications', NotificationsPage);
 router.register('#/support', SupportPage);
 router.register('#/profile', ProfilePage);
+
+// Register Admin SPA routes
+router.register('#/admin/dashboard', AdminDashboardPage);
+router.register('#/admin/bookings', AdminBookingsPage);
+router.register('#/admin/clients', AdminClientsPage);
+router.register('#/admin/alerts', AdminAlertsPage);
 
 function initApp() {
   // Sync page wrapper
