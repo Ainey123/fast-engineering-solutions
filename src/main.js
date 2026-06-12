@@ -101,6 +101,16 @@ router.register('#/admin/clients', AdminClientsPage);
 router.register('#/admin/alerts', AdminAlertsPage);
 
 function initApp() {
+  // Force unregister any stuck service workers to fix caching issues
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister();
+        console.log('ServiceWorker unregistered to fix cache.');
+      }
+    });
+  }
+
   // Sync page wrapper
   const appContainer = document.getElementById('app');
   if (appContainer && !document.getElementById('app-simulator')) {
