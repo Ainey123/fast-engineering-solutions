@@ -1,284 +1,175 @@
-// Page 3: Smart Services Dashboard (Main Application Hub)
-import { router } from '../core/router.js';
 import { store } from '../core/store.js';
-import { services } from '../data/services.js';
-import { getInitialNotifications } from '../data/notifications.js';
+import { fbSignOut } from '../core/firebase.js';
+import { LocationModal } from '../components/location-modal.js';
 
 export default class DashboardPage {
   constructor(params = {}) {
     this.params = params;
-    this.activePromo = 0;
-    this.promoCount = 3;
+    this.checkLocation = this.checkLocation.bind(this);
   }
 
   async render() {
     const state = store.getState();
-    const userName = state.user ? state.user.name : 'Valued Client';
+    const user = state.user;
+    const name = user ? user.name : 'Guest';
     
-    // Set default notifications if not set
-    if (!state.notifications) {
-      store.setState('notifications', getInitialNotifications());
-    }
-    const unreadCount = (store.getState().notifications || []).filter(n => !n.read).length;
-
-    // Greeting based on time
-    const hour = new Date().getHours();
-    let greeting = 'Hello';
-    if (hour < 12) greeting = 'Good Morning';
-    else if (hour < 18) greeting = 'Good Afternoon';
-    else greeting = 'Good Evening';
+    // Format saved address
+    const address = state.savedAddress 
+      ? `${state.savedAddress.home}, ${state.savedAddress.street}` 
+      : 'Select your location';
 
     return `
-      <!-- Header Area -->
-      <header class="header-nav">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 38px; height: 38px; border-radius: var(--radius-full); background-color: var(--color-primary); color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; border: 2px solid var(--color-surface-border);">
-            ${userName.charAt(0).toUpperCase()}
+      <div class="app-view-container">
+        <!-- Header -->
+        <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; background-color: var(--color-surface); z-index: 10; position: sticky; top: 0;">
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em;">SERVICE AT</span>
+            <button id="btn-select-location" style="display: flex; align-items: center; gap: 4px; background: none; border: none; padding: 0; margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--color-text-primary); cursor: pointer;">
+              <span style="color: var(--color-success); font-size: 1.2rem; margin-right: 2px;">•</span>
+              <span style="max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${address}</span>
+              <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: var(--color-text-secondary);"></i>
+            </button>
           </div>
-          <div>
-            <div style="font-size: 0.725rem; color: var(--color-text-tertiary); font-weight: 600;">${greeting}</div>
-            <div style="font-size: 0.95rem; font-weight: 700; letter-spacing: -0.015em;">${userName}</div>
-          </div>
-        </div>
-        
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <!-- Theme Toggle -->
-          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
-            <i data-lucide="${state.theme === 'light' ? 'moon' : 'sun'}"></i>
-          </button>
-          
-          <!-- Notifications Bell -->
-          <button id="btn-notifications" style="position: relative; background: none; border: none; cursor: pointer; padding: 8px; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-full); transition: background-color var(--transition-fast) ease;">
-            <i data-lucide="bell" style="width: 22px; height: 22px;"></i>
-            ${unreadCount > 0 ? `
-              <span style="position: absolute; top: 4px; right: 4px; background-color: var(--color-danger); color: white; font-size: 0.65rem; font-weight: 700; width: 16px; height: 16px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; border: 2px solid var(--color-surface);">
-                ${unreadCount}
-              </span>
-            ` : ''}
+          <button id="btn-logout" style="background: var(--color-input-bg); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative;">
+            <i data-lucide="log-out" style="width: 20px; height: 20px; color: var(--color-text-primary);"></i>
           </button>
         </div>
-      </header>
 
-      <div class="app-view-container no-scrollbar" style="padding: 16px 16px 88px;">
-        
-        <!-- Interactive Promo Discount Area -->
-        <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 24px; border: none; box-shadow: var(--shadow-md); position: relative; height: 140px;">
-          <div id="promo-track" style="display: flex; width: 300%; height: 100%; transition: transform 0.5s ease;">
+        <div style="padding: 0 16px 80px 16px;">
+          <!-- Welcome Message -->
+          <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 24px; color: var(--color-text-primary);">
+            Welcome back, ${name}
+          </h1>
+
+          <!-- Service Grid -->
+          <div class="service-grid-2col">
+            <!-- Card 1 -->
+            <a href="#/category/construction" class="service-card-square" style="text-decoration: none; color: inherit;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; width: 100%;">Construction &<br>Renovation</h3>
+              <div style="display: flex; gap: 4px; margin-bottom: 16px;">
+                <span class="badge badge-blue" style="font-size: 0.6rem;">COMMERCIAL</span>
+                <span class="badge badge-blue" style="font-size: 0.6rem;">RESIDENTIAL</span>
+              </div>
+              <img src="/icons/icon-192.png" alt="Construction" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto;">
+            </a>
+
+            <!-- Card 2 -->
+            <a href="#/category/electrical" class="service-card-square" style="text-decoration: none; color: inherit;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; width: 100%;">Electrical<br>Work</h3>
+              <div style="display: flex; gap: 4px; margin-bottom: 16px;">
+                <span class="badge badge-blue" style="font-size: 0.6rem;">INDUSTRIAL</span>
+                <span class="badge badge-blue" style="font-size: 0.6rem;">SOLAR</span>
+              </div>
+              <img src="/icons/icon-192.png" alt="Electrical" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto; filter: hue-rotate(90deg);">
+            </a>
             
-            <!-- Promo 1 -->
-            <div style="width: 33.333%; padding: 20px; background: linear-gradient(135deg, #0052cc 0%, #0066ff 100%); color: white; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <span class="badge" style="background-color: var(--color-secondary); color: var(--color-text-on-secondary); font-size: 0.65rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">June Special</span>
-                <h3 style="font-size: 1.15rem; color: #FFF; font-weight: 700; margin-bottom: 4px;">50% Off First Soil Test</h3>
-                <p style="font-size: 0.775rem; color: rgba(255,255,255,0.85);">Ensure structural safety prior to laying layout maps and bricks.</p>
+            <!-- Card 3 -->
+            <a href="#/category/facility" class="service-card-square" style="text-decoration: none; color: inherit;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; width: 100%;">Facility<br>Management</h3>
+              <div style="display: flex; gap: 4px; margin-bottom: 16px;">
+                <span class="badge badge-red" style="font-size: 0.6rem;">FURNISHED</span>
               </div>
-              <div style="font-size: 0.7rem; font-weight: 600; opacity: 0.9;">Code: SOIL50</div>
-            </div>
+              <img src="/icons/icon-192.png" alt="Facility" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto; filter: hue-rotate(180deg);">
+            </a>
 
-            <!-- Promo 2 -->
-            <div style="width: 33.333%; padding: 20px; background: linear-gradient(135deg, #1A1D20 0%, #2D3446 100%); color: white; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <span class="badge" style="background-color: var(--color-danger); color: white; font-size: 0.65rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Monsoon Prep</span>
-                <h3 style="font-size: 1.15rem; color: #FFF; font-weight: 700; margin-bottom: 4px;">Waterproofing — 20% Off</h3>
-                <p style="font-size: 0.775rem; color: rgba(255,255,255,0.85);">Complete chemical roof leakage & wall dampness protection before rains.</p>
+            <!-- Card 4 -->
+            <a href="#/subscription" class="service-card-square" style="text-decoration: none; color: inherit;">
+              <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; width: 100%;">Maintained by<br>Fast Eng</h3>
+              <div style="display: flex; gap: 4px; margin-bottom: 16px;">
+                <span class="badge badge-blue" style="font-size: 0.6rem;">SUBSCRIPTION PLANS</span>
               </div>
-              <div style="font-size: 0.7rem; font-weight: 600; opacity: 0.9;">Code: RAIN20</div>
-            </div>
-
-            <!-- Promo 3 -->
-            <div style="width: 33.333%; padding: 20px; background: linear-gradient(135deg, #FFB000 0%, #E09B00 100%); color: white; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <span class="badge" style="background-color: var(--color-primary); color: white; font-size: 0.65rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Solar Audits</span>
-                <h3 style="font-size: 1.15rem; color: var(--color-text-on-primary); font-weight: 700; margin-bottom: 4px;">Save 100k PKR On Solar</h3>
-                <p style="font-size: 0.775rem; color: var(--color-text-on-primary); opacity: 0.9;">Sign up for industrial power analysis & commercial net metering today.</p>
-              </div>
-              <div style="font-size: 0.7rem; font-weight: 600; color: var(--color-text-on-primary);">Code: SOLARPOW</div>
-            </div>
-
+              <img src="/icons/icon-192.png" alt="Maintained" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto; filter: hue-rotate(270deg);">
+            </a>
           </div>
           
-          <!-- Promo Dots -->
-          <div style="position: absolute; bottom: 12px; right: 16px; display: flex; gap: 6px;">
-            <div class="promo-dot active" data-idx="0" style="width: 6px; height: 6px; border-radius: 50%; background-color: rgba(255,255,255,0.9); transition: all 0.3s;"></div>
-            <div class="promo-dot" data-idx="1" style="width: 6px; height: 6px; border-radius: 50%; background-color: rgba(255,255,255,0.4); transition: all 0.3s;"></div>
-            <div class="promo-dot" data-idx="2" style="width: 6px; height: 6px; border-radius: 50%; background-color: rgba(255,255,255,0.4); transition: all 0.3s;"></div>
+          <!-- Banner -->
+          <div class="card" style="margin-top: 24px; padding: 0; overflow: hidden; display: flex; align-items: center; border: 1px solid var(--color-surface-border);">
+            <div style="padding: 20px; flex: 1;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Fast for Business</h3>
+              <div class="badge badge-blue" style="margin-bottom: 12px;">Your Corporate Maintenance Partner</div>
+            </div>
+            <div style="width: 100px; height: 100px; background-color: var(--color-accent-blue-tint); display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="briefcase" style="width: 48px; height: 48px; color: var(--color-primary);"></i>
+            </div>
           </div>
-        </div>
-
-        <!-- Section Title -->
-        <div style="margin-bottom: 16px;">
-          <h2 style="font-size: 1.15rem; font-weight: 800; letter-spacing: -0.025em; display: flex; align-items: center; gap: 8px;">
-            Engineering Services
-            <span class="badge badge-blue" style="font-size:0.65rem; padding: 2px 6px;">Certified</span>
-          </h2>
-        </div>
-
-        <!-- Services Grid -->
-        <div class="services-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px;">
           
-          <!-- Construction -->
-          <div class="card active-press service-card-item" data-id="construction" style="padding: 16px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
-            <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background-color: var(--color-accent-blue-tint); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="wrench" style="width: 22px; height: 22px;"></i>
+          <!-- Help Section -->
+          <div style="margin-top: 24px; display: flex; align-items: center; gap: 16px; padding: 16px; background-color: var(--color-surface); border-radius: var(--radius-lg); border: 1px solid var(--color-surface-border);">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--color-input-bg); display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="info" style="width: 20px; height: 20px; color: var(--color-text-primary);"></i>
             </div>
-            <div style="margin-top: 16px;">
-              <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2;">Construction & Renovation</h3>
-              <p style="font-size: 0.725rem; line-height: 1.3;">Build & upgrades</p>
-            </div>
-          </div>
-
-          <!-- Maintenance -->
-          <div class="card active-press service-card-item" data-id="maintenance" style="padding: 16px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
-            <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background-color: var(--color-accent-amber-tint); color: var(--color-secondary-hover); display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="settings" style="width: 22px; height: 22px;"></i>
-            </div>
-            <div style="margin-top: 16px;">
-              <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2;">Technical Maintenance</h3>
-              <p style="font-size: 0.725rem; line-height: 1.3;">Audits & repairs</p>
-            </div>
-          </div>
-
-          <!-- Facility -->
-          <div class="card active-press service-card-item" data-id="facility" style="padding: 16px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px;">
-            <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background-color: rgba(88, 86, 214, 0.1); color: var(--color-info); display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="activity" style="width: 22px; height: 22px;"></i>
-            </div>
-            <div style="margin-top: 16px;">
-              <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2;">Facility & Power</h3>
-              <p style="font-size: 0.725rem; line-height: 1.3;">Solar & generators</p>
-            </div>
-          </div>
-
-          <!-- Emergency SOS -->
-          <div class="card active-press service-card-item pulse-sos-btn" data-id="emergency" style="padding: 16px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 140px; border-color: rgba(255, 59, 48, 0.3); background-color: var(--color-accent-red-tint);">
-            <div style="width: 42px; height: 42px; border-radius: var(--radius-md); background-color: var(--color-danger); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(255,59,48,0.3);">
-              <i data-lucide="alert-triangle" style="width: 22px; height: 22px;"></i>
-            </div>
-            <div style="margin-top: 16px;">
-              <h3 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; line-height: 1.2; color: var(--color-danger);">Emergency SOS Repair</h3>
-              <p style="font-size: 0.725rem; line-height: 1.3; color: var(--color-danger); font-weight: 500;">Critical hazard response</p>
+            <div>
+              <h4 style="font-weight: 600; font-size: 1rem;">Get Help</h4>
+              <p style="font-size: 0.85rem; color: var(--color-text-tertiary);">Talk to support (+92 300 4545280)</p>
             </div>
           </div>
 
         </div>
 
-        <!-- Quick Summary Tracker Mini Banner -->
-        <div id="mini-tracker-card" class="card active-press" style="cursor: pointer; padding: 14px 16px; display: flex; align-items: center; gap: 14px; background-color: var(--color-surface); border-left: 4px solid var(--color-primary);">
-          <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-accent-blue-tint); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
-            <i data-lucide="package-search" style="width: 20px; height: 20px;"></i>
-          </div>
-          <div style="flex: 1;">
-            <div style="font-size: 0.75rem; color: var(--color-text-tertiary); font-weight: 600;">ACTIVE SERVICE TRACKER</div>
-            <div style="font-size: 0.85rem; font-weight: 700;">Job #FES-9842 is In Progress</div>
-          </div>
-          <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: var(--color-text-tertiary);"></i>
-        </div>
-
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav-bar">
+          <button class="nav-item is-active" onclick="window.location.hash='#/dashboard'">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+          </button>
+          <button class="nav-item" onclick="window.location.hash='#/orders'">
+            <i data-lucide="list"></i>
+            <span>Orders</span>
+          </button>
+          <button class="nav-item" onclick="window.location.hash='#/messages'">
+            <i data-lucide="message-square"></i>
+            <span>Messages</span>
+          </button>
+          <button class="nav-item" onclick="window.location.hash='#/wallet'">
+            <i data-lucide="wallet"></i>
+            <span>Wallet</span>
+          </button>
+        </nav>
       </div>
-
-      <!-- Bottom Floating Nav Bar -->
-      <nav class="bottom-nav-bar">
-        <button class="nav-item is-active" data-route="#/dashboard">
-          <i data-lucide="home"></i>
-          <span>Home</span>
-        </button>
-        <button class="nav-item" data-route="#/bookings">
-          <i data-lucide="calendar"></i>
-          <span>Bookings</span>
-        </button>
-        <button class="nav-item" data-route="#/support">
-          <i data-lucide="phone"></i>
-          <span>Support</span>
-        </button>
-        <button class="nav-item" data-route="#/profile">
-          <i data-lucide="user"></i>
-          <span>Profile</span>
-        </button>
-      </nav>
     `;
   }
 
   afterRender() {
-    this.themeToggle = document.getElementById('theme-toggle');
-    this.btnNotifications = document.getElementById('btn-notifications');
-    this.promoTrack = document.getElementById('promo-track');
-    this.promoDots = document.querySelectorAll('.promo-dot');
-    this.serviceCards = document.querySelectorAll('.service-card-item');
-    this.miniTracker = document.getElementById('mini-tracker-card');
-    
-    // Theme Switcher
-    this.themeToggle.addEventListener('click', () => {
-      store.toggleTheme();
-      const nextIcon = store.getState().theme === 'light' ? 'moon' : 'sun';
-      this.themeToggle.innerHTML = `<i data-lucide="${nextIcon}"></i>`;
+    if (window.lucide) {
       window.lucide.createIcons();
+    }
+    
+    document.getElementById('btn-select-location').addEventListener('click', () => {
+      this.checkLocation(true);
     });
 
-    // Notifications Link
-    this.btnNotifications.addEventListener('click', () => {
-      router.navigate('#/notifications');
-    });
-
-    // Quick Tracker Link
-    if (this.miniTracker) {
-      this.miniTracker.addEventListener('click', () => {
-        router.navigate('#/bookings');
+    const logoutBtn = document.getElementById('btn-logout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await fbSignOut();
+          window.location.hash = '#/auth';
+        } catch (error) {
+          console.error("Logout failed", error);
+        }
       });
     }
 
-    // Service Card Grid Clicks
-    this.serviceCards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        const serviceId = e.currentTarget.getAttribute('data-id');
-        router.navigate(`#/service/${serviceId}`);
-      });
-    });
-
-    // Auto Promo Carousel Rotate
-    this.promoInterval = setInterval(() => {
-      this.activePromo = (this.activePromo + 1) % this.promoCount;
-      this.updatePromoSlide();
-    }, 4000);
-
-    // Support Swipe for promo slides
-    this.promoDots.forEach(dot => {
-      dot.addEventListener('click', (e) => {
-        clearInterval(this.promoInterval);
-        const idx = parseInt(e.target.getAttribute('data-idx'));
-        this.activePromo = idx;
-        this.updatePromoSlide();
-      });
-    });
-
-    // Bottom Navigation Handlers
-    document.querySelectorAll('.bottom-nav-bar .nav-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        const route = e.currentTarget.getAttribute('data-route');
-        router.navigate(route);
-      });
-    });
+    // Check location on load if not set
+    this.checkLocation(false);
   }
-
-  updatePromoSlide() {
-    if (this.promoTrack) {
-      this.promoTrack.style.transform = `translateX(-${this.activePromo * 33.333}%)`;
+  
+  checkLocation(force = false) {
+    const state = store.getState();
+    if (force || !state.location || !state.savedAddress) {
+      const modal = new LocationModal((locationData, addressData) => {
+        if (locationData) store.setState('location', locationData);
+        if (addressData) {
+          store.setState('savedAddress', addressData);
+          // Reload view to show new address
+          window.location.reload();
+        }
+      });
+      modal.show();
     }
-    this.promoDots.forEach((dot, idx) => {
-      if (idx === this.activePromo) {
-        dot.classList.add('active');
-        dot.style.backgroundColor = 'rgba(255,255,255,0.9)';
-        dot.style.width = '12px';
-      } else {
-        dot.classList.remove('active');
-        dot.style.backgroundColor = 'rgba(255,255,255,0.4)';
-        dot.style.width = '6px';
-      }
-    });
   }
 
   destroy() {
-    if (this.promoInterval) {
-      clearInterval(this.promoInterval);
-    }
+    // Cleanup if necessary
   }
 }

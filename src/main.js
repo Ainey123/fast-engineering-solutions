@@ -87,6 +87,7 @@ window.lucide = {
 router.register('#/onboarding', OnboardingPage);
 router.register('#/auth', AuthPage);
 router.register('#/dashboard', DashboardPage);
+router.register('#/category/:id', CategoryPage);
 router.register('#/service/:id', ServiceExplainerPage);
 router.register('#/booking', BookingWizardPage);
 router.register('#/bookings', BookingsTrackerPage);

@@ -1,7 +1,7 @@
 // Admin Dashboard - Overview Statistics
 import { router } from '../../core/router.js';
 import { store } from '../../core/store.js';
-import { db, fbSignOut } from '../../core/firebase.js';
+import { db } from '../../core/firebase.js';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 export default class AdminDashboardPage {
@@ -121,7 +121,11 @@ export default class AdminDashboardPage {
   afterRender() {
     // Logout
     document.getElementById('admin-logout')?.addEventListener('click', async () => {
-      await fbSignOut();
+      try {
+        await store.logout();
+      } catch (e) {
+        console.warn('Logout failed:', e);
+      }
       router.navigate('#/auth');
     });
 

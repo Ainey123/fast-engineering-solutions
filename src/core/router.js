@@ -38,6 +38,8 @@ class HashRouter {
   handleRouting() {
     const fullHash = window.location.hash || '#/onboarding';
     const [hash, queryString] = fullHash.split('?');
+    const urlSearch = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
+    const forceAuth = urlSearch.get('force') === 'true';
     const state = store.getState();
 
     // 1. Must complete onboarding first
@@ -68,9 +70,14 @@ class HashRouter {
     }
 
     // 4. Logged-in user trying to access auth/onboarding again
+    // Allow an explicit override: `#/auth?force=true` will show the auth page even if user is logged-in.
     if (state.user && (hash === '#/auth' || hash === '#/onboarding')) {
-      this.navigate(state.userRole === 'admin' ? '#/admin/dashboard' : '#/dashboard');
-      return;
+      if (hash === '#/auth' && forceAuth) {
+        // allow visiting the auth page explicitly (useful for testing or re-auth flows)
+      } else {
+        this.navigate(state.userRole === 'admin' ? '#/admin/dashboard' : '#/dashboard');
+        return;
+      }
     }
 
     // 5. CLIENT trying to access admin pages — block immediately

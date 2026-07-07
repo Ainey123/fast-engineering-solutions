@@ -1,4 +1,4 @@
-import { auth, db } from './firebase.js';
+import { auth, db, fbSignOut } from './firebase.js';
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
 
@@ -13,7 +13,9 @@ class GlobalStore {
       bookings: [],
       notifications: JSON.parse(localStorage.getItem('fes_notifications')) || null,
       onboardingComplete: localStorage.getItem('fes_onboarding_complete') === 'true',
-      authInitialized: false
+      authInitialized: false,
+      location: JSON.parse(localStorage.getItem('fes_location')) || null, // { lat, lng, type: 'precise' | 'approximate' }
+      savedAddress: JSON.parse(localStorage.getItem('fes_saved_address')) || null // { home: '', street: '' }
     };
 
     this.applyTheme(this.state.theme);
@@ -103,6 +105,8 @@ class GlobalStore {
     this.state[key] = value;
     if (key === 'notifications') localStorage.setItem('fes_notifications', JSON.stringify(value));
     else if (key === 'onboardingComplete') localStorage.setItem('fes_onboarding_complete', value.toString());
+    else if (key === 'location') localStorage.setItem('fes_location', JSON.stringify(value));
+    else if (key === 'savedAddress') localStorage.setItem('fes_saved_address', JSON.stringify(value));
     this.publish(key, value);
     this.publish('state_changed', this.state);
   }
@@ -116,6 +120,22 @@ class GlobalStore {
     this.applyTheme(nextTheme);
     this.publish('theme', nextTheme);
     this.publish('state_changed', this.state);
+  }
+
+  async logout() {
+    try {
+      await fbSignOut();
+    } catch (e) {
+      console.warn('Sign out failed:', e);
+    }
+    this.setState('user', null);
+    this.setState('userRole', null);
+    this.setState('bookings', []);
+    if (this.unsubBookings) {
+      try { this.unsubBookings(); } catch (_) {}
+      this.unsubBookings = null;
+    }
+    this.publish('signed_out', true);
   }
 
   applyTheme(theme) {

@@ -2,8 +2,9 @@
 import { router } from '../core/router.js';
 import { store } from '../core/store.js';
 import { isValidEmail, isValidPassword } from '../core/utils.js';
-import { fbSignIn, fbSignUp, fbGoogleSignIn, db } from '../core/firebase.js';
+import { fbSignIn, fbSignUp, fbGoogleSignIn, db, auth, fbSignOut } from '../core/firebase.js';
 import { doc, setDoc } from 'firebase/firestore';
+import { deleteUser } from 'firebase/auth';
 
 export default class AuthPage {
   constructor(params = {}) {
@@ -218,17 +219,16 @@ export default class AuthPage {
       }, 1000);
     });
 
-    // Toggle Password Visibility
+    // Toggle Password Visibility (robust against lucide replacing <i> with <svg>)
     document.querySelectorAll('.toggle-password').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const input = e.currentTarget.previousElementSibling;
-        const icon = e.currentTarget.querySelector('i');
         if (input.type === 'password') {
           input.type = 'text';
-          icon.setAttribute('data-lucide', 'eye-off');
+          e.currentTarget.innerHTML = '<i data-lucide="eye-off" style="width: 18px; height: 18px;"></i>';
         } else {
           input.type = 'password';
-          icon.setAttribute('data-lucide', 'eye');
+          e.currentTarget.innerHTML = '<i data-lucide="eye" style="width: 18px; height: 18px;"></i>';
         }
         if (window.lucide) window.lucide.createIcons();
       });
@@ -352,11 +352,26 @@ export default class AuthPage {
 
       try {
         const userCredential = await fbSignUp(emailInput.value, passwordInput.value);
-        await setDoc(doc(db, 'users', userCredential.user.uid), {
-          name: nameInput.value,
-          email: emailInput.value,
-          createdAt: new Date().toISOString()
-        });
+        try {
+          await setDoc(doc(db, 'users', userCredential.user.uid), {
+            name: nameInput.value,
+            email: emailInput.value,
+            createdAt: new Date().toISOString()
+          });
+        } catch (e) {
+          // If saving the user document fails, remove the newly created auth user to avoid orphaned accounts
+          alert('Account created but failed to save profile: ' + e.message);
+          try {
+            if (auth && auth.currentUser) await deleteUser(auth.currentUser);
+          } catch (delErr) {
+            console.warn('Failed to delete orphaned user:', delErr);
+            // As a fallback, sign out the user
+            try { await fbSignOut(); } catch (_) {}
+          }
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          return;
+        }
         router.navigate('#/dashboard');
       } catch (error) {
         alert('Sign Up Failed: ' + error.message);
