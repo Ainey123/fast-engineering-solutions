@@ -7,6 +7,7 @@ import { store } from './core/store.js';
 import OnboardingPage from './pages/onboarding.js';
 import AuthPage from './pages/auth.js';
 import DashboardPage from './pages/dashboard.js';
+import CategoryPage from './pages/category.js';
 import ServiceExplainerPage from './pages/service.js';
 import BookingWizardPage from './pages/booking.js';
 import BookingsTrackerPage from './pages/bookings.js';
@@ -66,7 +67,19 @@ import {
   ClipboardList,
   Inbox,
   Siren,
-  ShieldCheck as ShieldCheckIcon
+  List,
+  Wallet,
+  Info,
+  Briefcase,
+  Star,
+  PenTool,
+  Layout,
+  Wind,
+  BatteryCharging,
+  Droplets,
+  Package,
+  Search,
+  Hammer
 } from 'lucide';
 
 // Expose tree-shaken lucide globally for lifecycle re-render triggers
@@ -78,7 +91,9 @@ window.lucide = {
       Bell, Home, Calendar, Phone, PhoneCall, User, Users, CalendarX,
       ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Check, FileText, Trash2,
       Mail, Moon, Sun, Building2, MapPin, PackageSearch, BellOff, UploadCloud,
-      Zap, Route, ClipboardList, Inbox, Siren
+      Zap, Route, ClipboardList, Inbox, Siren,
+      List, Wallet, Info, Briefcase, Star, PenTool, Layout, Wind,
+      BatteryCharging, Droplets, Package, Search, Hammer
     }
   })
 };

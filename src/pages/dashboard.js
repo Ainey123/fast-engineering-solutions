@@ -50,7 +50,9 @@ export default class DashboardPage {
                 <span class="badge badge-blue" style="font-size: 0.6rem;">COMMERCIAL</span>
                 <span class="badge badge-blue" style="font-size: 0.6rem;">RESIDENTIAL</span>
               </div>
-              <img src="/icons/icon-192.png" alt="Construction" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto;">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #FF6B2B, #FF8F5E); display: flex; align-items: center; justify-content: center; margin-top: auto;">
+                <i data-lucide="hammer" style="width: 36px; height: 36px; color: white;"></i>
+              </div>
             </a>
 
             <!-- Card 2 -->
@@ -60,7 +62,9 @@ export default class DashboardPage {
                 <span class="badge badge-blue" style="font-size: 0.6rem;">INDUSTRIAL</span>
                 <span class="badge badge-blue" style="font-size: 0.6rem;">SOLAR</span>
               </div>
-              <img src="/icons/icon-192.png" alt="Electrical" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto; filter: hue-rotate(90deg);">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #FFB800, #FFD54F); display: flex; align-items: center; justify-content: center; margin-top: auto;">
+                <i data-lucide="zap" style="width: 36px; height: 36px; color: white;"></i>
+              </div>
             </a>
             
             <!-- Card 3 -->
@@ -69,7 +73,9 @@ export default class DashboardPage {
               <div style="display: flex; gap: 4px; margin-bottom: 16px;">
                 <span class="badge badge-red" style="font-size: 0.6rem;">FURNISHED</span>
               </div>
-              <img src="/icons/icon-192.png" alt="Facility" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto; filter: hue-rotate(180deg);">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #0066FF, #4D94FF); display: flex; align-items: center; justify-content: center; margin-top: auto;">
+                <i data-lucide="wrench" style="width: 36px; height: 36px; color: white;"></i>
+              </div>
             </a>
 
             <!-- Card 4 -->
@@ -78,7 +84,9 @@ export default class DashboardPage {
               <div style="display: flex; gap: 4px; margin-bottom: 16px;">
                 <span class="badge badge-blue" style="font-size: 0.6rem;">SUBSCRIPTION PLANS</span>
               </div>
-              <img src="/icons/icon-192.png" alt="Maintained" style="width: 100px; height: 100px; object-fit: contain; margin-top: auto; filter: hue-rotate(270deg);">
+              <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #10B981, #34D399); display: flex; align-items: center; justify-content: center; margin-top: auto;">
+                <i data-lucide="settings" style="width: 36px; height: 36px; color: white;"></i>
+              </div>
             </a>
           </div>
           
