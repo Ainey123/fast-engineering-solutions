@@ -26,15 +26,19 @@ class GlobalStore {
     onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          // Fetch user role from Firestore
+          // Fetch user role from Firestore (with timeout so app works offline)
           let role = 'client';
           try {
-            const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-            if (userDoc.exists()) {
+            const rolePromise = getDoc(doc(db, 'users', firebaseUser.uid));
+            const timeoutPromise = new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Firestore timeout')), 5000)
+            );
+            const userDoc = await Promise.race([rolePromise, timeoutPromise]);
+            if (userDoc && userDoc.exists()) {
               role = userDoc.data().role || 'client';
             }
           } catch (e) {
-            console.warn('Could not fetch user role:', e);
+            console.warn('Could not fetch user role (using default "client"):', e.message);
           }
 
           const safeEmail = firebaseUser.email || '';
