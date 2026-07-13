@@ -1,19 +1,20 @@
+import { fetchRealLocation } from '../core/utils.js';
+
 export class LocationModal {
   constructor(onComplete) {
     this.onComplete = onComplete;
     this.container = document.createElement('div');
     this.container.className = 'modal-overlay';
     document.body.appendChild(this.container);
-    
-    // Bind methods
+
     this.renderPermissionModal = this.renderPermissionModal.bind(this);
+    this.renderLoadingModal = this.renderLoadingModal.bind(this);
     this.renderAddressModal = this.renderAddressModal.bind(this);
     this.close = this.close.bind(this);
   }
 
   show() {
     this.renderPermissionModal();
-    // Allow DOM to update before adding show class for transition
     requestAnimationFrame(() => {
       this.container.classList.add('show');
     });
@@ -30,104 +31,153 @@ export class LocationModal {
 
   renderPermissionModal() {
     this.container.innerHTML = `
-      <div class="bottom-sheet" style="text-align: center; max-height: 90vh; overflow-y: auto;">
-        <div style="margin-bottom: 24px;">
-          <i data-lucide="map-pin" style="width: 32px; height: 32px; color: var(--color-text-secondary);"></i>
+      <div class="bottom-sheet" style="text-align: center; padding: 32px 24px;">
+        <div style="width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #0066FF, #4D94FF); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
         </div>
-        
-        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 24px; padding: 0 16px;">
-          Allow <span style="color: var(--color-primary);">Fast Engineering Solutions</span> to access this device's location?
+
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 8px;">
+          Enable Location
         </h3>
-        
-        <div class="map-selection-grid">
-          <div class="map-bubble active" id="btn-precise">
-            <div style="width: 48px; height: 48px; background-color: var(--color-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            </div>
-            <div style="margin-top: 12px; font-weight: 600; font-size: 0.9rem; z-index: 2;">Precise</div>
-            <svg style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0.15; z-index: 1;" viewBox="0 0 100 100"><path d="M0,20 L100,50 M20,0 L50,100 M0,80 L100,20" stroke="currentColor" stroke-width="2"/></svg>
-          </div>
-          
-          <div class="map-bubble" id="btn-approximate">
-             <div style="width: 48px; height: 48px; background-color: var(--color-surface); border: 2px solid var(--color-text-tertiary); border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-text-tertiary);"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            </div>
-            <div style="margin-top: 12px; font-weight: 600; font-size: 0.9rem; z-index: 2; color: var(--color-text-tertiary);">Approximate</div>
-            <svg style="position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0.1; z-index: 1;" viewBox="0 0 100 100"><path d="M10,10 L90,20 M10,90 L80,80 M20,10 L30,90" stroke="currentColor" stroke-width="2"/></svg>
-          </div>
+        <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 28px; line-height: 1.5;">
+          <strong>Fast Engineering Solutions</strong> needs your location to show services near you and fill your site address automatically.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button id="btn-allow-location" style="
+            background: #0066FF;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+          ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+            Allow Location Access
+          </button>
+
+          <button id="btn-deny-location" style="
+            background: none;
+            border: none;
+            color: var(--color-text-tertiary);
+            font-size: 0.9rem;
+            padding: 12px;
+            cursor: pointer;
+          ">
+            Not now, I'll enter address manually
+          </button>
         </div>
-        
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          <button class="btn btn-outline" id="btn-allow-while" style="border: none; color: var(--color-primary); font-size: 1rem;">While using the app</button>
-          <button class="btn btn-outline" id="btn-allow-once" style="border: none; color: var(--color-primary); font-size: 1rem;">Only this time</button>
-          <button class="btn btn-outline" id="btn-deny" style="border: none; color: var(--color-text-tertiary); font-size: 1rem;">Don't allow</button>
-        </div>
+
+        <p style="font-size: 0.72rem; color: var(--color-text-tertiary); margin-top: 16px;">
+          Your location is only used for this service request and is never shared with third parties.
+        </p>
       </div>
     `;
 
-    if (window.lucide) window.lucide.createIcons();
-
-    let selection = 'precise';
-
-    const btnPrecise = this.container.querySelector('#btn-precise');
-    const btnApproximate = this.container.querySelector('#btn-approximate');
-
-    btnPrecise.addEventListener('click', () => {
-      selection = 'precise';
-      btnPrecise.classList.add('active');
-      btnApproximate.classList.remove('active');
+    this.container.querySelector('#btn-allow-location').addEventListener('click', () => {
+      this.requestRealLocation();
     });
 
-    btnApproximate.addEventListener('click', () => {
-      selection = 'approximate';
-      btnApproximate.classList.add('active');
-      btnPrecise.classList.remove('active');
-    });
-
-    const proceedWithLocation = () => {
-      const mockLocation = {
-        lat: 31.5204, // Lahore
-        lng: 74.3587,
-        type: selection
-      };
-      this.renderAddressModal(mockLocation);
-    };
-
-    this.container.querySelector('#btn-allow-while').addEventListener('click', proceedWithLocation);
-    this.container.querySelector('#btn-allow-once').addEventListener('click', proceedWithLocation);
-    
-    this.container.querySelector('#btn-deny').addEventListener('click', () => {
-      this.close();
-      if (this.onComplete) this.onComplete(null, null); // Denied
+    this.container.querySelector('#btn-deny-location').addEventListener('click', () => {
+      this.renderAddressModal(null);
     });
   }
 
+  renderLoadingModal() {
+    this.container.innerHTML = `
+      <div class="bottom-sheet" style="text-align: center; padding: 48px 24px;">
+        <div style="width: 56px; height: 56px; border: 4px solid var(--color-primary); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px;"></div>
+        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Getting Your Location...</h3>
+        <p style="font-size: 0.85rem; color: var(--color-text-secondary);">Please allow location access when your browser asks.</p>
+      </div>
+    `;
+  }
+
+  async requestRealLocation() {
+    this.renderLoadingModal();
+
+    try {
+      const locationData = await fetchRealLocation();
+      this.renderAddressModal({
+        lat: parseFloat(locationData.latitude),
+        lng: parseFloat(locationData.longitude),
+        address: locationData.address,
+        type: 'precise'
+      });
+    } catch (err) {
+      // Show error then fall back to manual entry
+      this.container.innerHTML = `
+        <div class="bottom-sheet" style="text-align: center; padding: 32px 24px;">
+          <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; color: #ef4444;">Location Access Failed</h3>
+          <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 24px; line-height: 1.5;">${err.message}</p>
+          <button id="btn-manual-fallback" style="background: #0066FF; color: white; border: none; border-radius: 12px; padding: 14px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%;">
+            Enter Address Manually
+          </button>
+        </div>
+      `;
+      this.container.querySelector('#btn-manual-fallback').addEventListener('click', () => {
+        this.renderAddressModal(null);
+      });
+    }
+  }
+
   renderAddressModal(locationData) {
+    const autoAddress = locationData ? locationData.address : '';
+    const coordsLine = locationData ? `<p style="font-size: 0.75rem; color: var(--color-success); margin-top: 4px; margin-bottom: 0;">📍 GPS: ${locationData.lat?.toFixed(4)}, ${locationData.lng?.toFixed(4)}</p>` : '';
+
     this.container.innerHTML = `
       <div class="bottom-sheet" style="padding: 24px; position: relative;">
-        <button id="btn-close-address" style="position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; color: var(--color-danger);">
-          <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+        <button id="btn-close-address" style="position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; color: var(--color-text-tertiary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
-        
-        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 24px;">Add Address Details</h3>
-        
+
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px;">Confirm Your Location</h3>
+        ${locationData ? '<p style="font-size: 0.8rem; color: var(--color-success); margin-bottom: 20px; font-weight: 600;">✓ Location detected automatically</p>' : '<p style="font-size: 0.8rem; color: var(--color-text-tertiary); margin-bottom: 20px;">Enter your address manually</p>'}
+
         <div class="form-group">
-          <label class="form-label" style="color: var(--color-text-primary); font-size: 1rem;">Home</label>
-          <input type="text" id="input-home" class="form-control" placeholder="Name/Number" style="border-radius: 12px; border: 1px solid var(--color-surface-border); padding: 16px;">
+          <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">Detected / Service Address</label>
+          <textarea id="input-full-address" class="form-control" rows="3" style="resize: none;" placeholder="e.g. House 12, Block B, DHA Phase 5, Lahore">${autoAddress}</textarea>
+          ${coordsLine}
         </div>
-        
-        <div class="form-group" style="margin-bottom: 32px;">
-          <label class="form-label" style="color: var(--color-text-primary); font-size: 1rem;">Street</label>
-          <input type="text" id="input-street" class="form-control" placeholder="Name/Number" style="border-radius: 12px; border: 1px solid var(--color-surface-border); padding: 16px;">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">House / Flat No.</label>
+            <input type="text" id="input-home" class="form-control" placeholder="e.g. House 12">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 0.85rem; font-weight: 600;">Street / Area</label>
+            <input type="text" id="input-street" class="form-control" placeholder="e.g. DHA Phase 5">
+          </div>
         </div>
-        
-        <button class="btn btn-primary" id="btn-save-address" style="padding: 16px; border-radius: 12px; font-size: 1.1rem; background-color: #000; color: #FFF;">
-          Save and Continue
+
+        <button id="btn-save-address" style="
+          width: 100%;
+          background: #0066FF;
+          color: white;
+          border: none;
+          border-radius: 14px;
+          padding: 16px;
+          font-size: 1rem;
+          font-weight: 700;
+          cursor: pointer;
+        ">
+          Save Location & Continue
         </button>
       </div>
     `;
-
-    if (window.lucide) window.lucide.createIcons();
 
     this.container.querySelector('#btn-close-address').addEventListener('click', () => {
       this.close();
@@ -135,14 +185,27 @@ export class LocationModal {
     });
 
     this.container.querySelector('#btn-save-address').addEventListener('click', () => {
+      const fullAddress = this.container.querySelector('#input-full-address').value.trim();
       const home = this.container.querySelector('#input-home').value.trim();
       const street = this.container.querySelector('#input-street').value.trim();
-      
+
+      if (!fullAddress && !home) {
+        this.container.querySelector('#input-full-address').style.border = '2px solid #ef4444';
+        return;
+      }
+
       const addressData = {
-        home: home || 'Main Hub',
-        street: street || 'Lahore, Pakistan'
+        fullAddress: fullAddress || `${home}, ${street}`,
+        home: home || '',
+        street: street || ''
       };
-      
+
+      // If we got real GPS, attach it
+      if (locationData) {
+        addressData.lat = locationData.lat;
+        addressData.lng = locationData.lng;
+      }
+
       this.close();
       if (this.onComplete) this.onComplete(locationData, addressData);
     });

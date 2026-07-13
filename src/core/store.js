@@ -85,9 +85,17 @@ class GlobalStore {
     const q = query(collection(db, 'bookings'), where('userId', '==', uid));
     this.unsubBookings = onSnapshot(q, (snapshot) => {
       const bookings = [];
-      snapshot.forEach(d => bookings.push({ id: d.id, ...d.data() }));
-      bookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      snapshot.forEach(d => {
+        const data = d.data();
+        // Normalize createdAt: Firestore Timestamp -> milliseconds for sorting
+        const createdMs = data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now();
+        bookings.push({ id: d.id, ...data, _createdMs: createdMs });
+      });
+      // Sort newest first
+      bookings.sort((a, b) => b._createdMs - a._createdMs);
       this.setState('bookings', bookings);
+    }, (err) => {
+      console.warn('Bookings listener error:', err.message);
     });
   }
 

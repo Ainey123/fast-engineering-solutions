@@ -1,7 +1,6 @@
 // Page 6: Real-Time Project Progress Tracker
 import { router } from '../core/router.js';
 import { store } from '../core/store.js';
-import { getInitialBookings } from '../data/bookings.js';
 
 export default class BookingsTrackerPage {
   constructor(params = {}) {
@@ -11,17 +10,13 @@ export default class BookingsTrackerPage {
 
   async render() {
     const state = store.getState();
-    
-    // Set default bookings if not present
-    if (!state.bookings) {
-      store.setState('bookings', getInitialBookings());
-    }
 
-    const bookings = store.getState().bookings;
+    // Load real bookings from store (populated by Firestore listener in store.js)
+    const bookings = state.bookings || [];
     
     // Default to expanding the first booking if none selected
     if (!this.expandedBookingId && bookings.length > 0) {
-      this.expandedBookingId = bookings[0].id;
+      this.expandedBookingId = bookings[0].id || bookings[0].trackerId;
     }
 
     const statusSteps = ['Approved', 'Dispatched', 'In Progress', 'Completed'];

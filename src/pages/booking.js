@@ -1,8 +1,10 @@
 // Page 5: Advanced Booking & File Upload Wizard
 import { router } from '../core/router.js';
 import { store } from '../core/store.js';
-import { generateTrackingId, fetchMockLocation } from '../core/utils.js';
+import { generateTrackingId, fetchRealLocation } from '../core/utils.js';
 import { services } from '../data/services.js';
+import { db } from '../core/firebase.js';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default class BookingWizardPage {
   constructor(params = {}) {
@@ -91,13 +93,13 @@ export default class BookingWizardPage {
             </div>
 
             <div class="form-group" style="margin-bottom: 8px;">
-              <label class="form-label" for="booking-gps">GPS Location Address</label>
-              <textarea id="booking-gps" class="form-control" style="resize: none; height: 80px;" placeholder="Fetch coordinates or type structural site address">${this.formData.gpsLocation}</textarea>
-              <div class="form-feedback" id="booking-gps-feedback">Please provide target site coordinates or address.</div>
+              <label class="form-label" for="booking-gps">Site / Service Location</label>
+              <textarea id="booking-gps" class="form-control" style="resize: none; height: 80px;" placeholder="Tap 'Use My Location' or type the site address">${this.formData.gpsLocation}</textarea>
+              <div class="form-feedback" id="booking-gps-feedback">Please provide target site address or coordinates.</div>
             </div>
 
-            <button type="button" id="btn-fetch-gps" class="btn btn-secondary active-press btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> Fetch Current GPS Location
+            <button type="button" id="btn-fetch-gps" class="btn btn-secondary active-press btn-sm" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-bottom: 4px;">
+              <i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> Use My Current Location
             </button>
             <div id="gps-status" style="margin-top: 8px; font-size: 0.775rem; text-align: center; font-weight: 500; display: none;"></div>
           </div>
@@ -105,7 +107,7 @@ export default class BookingWizardPage {
           <!-- STEP 3: MEDIA & BLUEPRINTS -->
           <div id="booking-step-3" class="step-panel" style="display: none;">
             <div class="form-group" style="margin-bottom: 16px;">
-              <label class="form-label">Upload Site Blueprints/Photos</label>
+              <label class="form-label">Upload Site Blueprints/Photos (Optional)</label>
               
               <!-- File picker dropzone -->
               <label for="file-picker" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--color-input-border); border-radius: var(--radius-md); padding: 32px 16px; cursor: pointer; text-align: center; transition: background-color var(--transition-fast) ease;">
@@ -122,7 +124,6 @@ export default class BookingWizardPage {
             <div id="uploaded-files-list" style="display: flex; flex-direction: column; gap: 10px;">
               <!-- Dynamically populated files -->
             </div>
-            <div class="form-feedback" id="booking-files-feedback" style="margin-top: 8px;">Please upload at least one PDF blueprint or site photo.</div>
           </div>
 
         </div>
@@ -148,12 +149,12 @@ export default class BookingWizardPage {
         </div>
 
         <h1 style="font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px;">Booking Confirmed!</h1>
-        <p style="font-size: 0.95rem; max-width: 300px; margin-bottom: 32px;">Your engineering request has been logged successfully. An officer will review details shortly.</p>
+        <p style="font-size: 0.95rem; max-width: 300px; margin-bottom: 32px;">Your engineering request has been logged. An officer will review and contact you shortly.</p>
 
         <!-- Booking Tracker Card -->
         <div class="card" style="width: 100%; max-width: 340px; padding: 16px; margin-bottom: 40px; border-color: var(--color-primary); background-color: var(--color-accent-blue-tint);">
           <div style="font-size: 0.775rem; color: var(--color-text-tertiary); font-weight: 600; text-transform: uppercase;">Unique Tracker Reference</div>
-          <div id="success-tracker-id" style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary); margin-top: 4px;">#FES-9842</div>
+          <div id="success-tracker-id" style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary); margin-top: 4px;">#FES-0000</div>
         </div>
 
         <!-- Next Action Button -->
@@ -203,12 +204,10 @@ export default class BookingWizardPage {
 
   navigateStep(delta) {
     if (delta === 1 && !this.validateCurrentStep()) {
-      return; // Stop if validation fails
+      return;
     }
 
-    // Update internal form values from inputs
     this.saveStepData();
-
     this.currentStep += delta;
 
     if (this.currentStep > this.totalSteps) {
@@ -318,10 +317,6 @@ export default class BookingWizardPage {
         document.getElementById('booking-gps').classList.remove('is-invalid');
         gpsFeedback.classList.remove('is-error');
       }
-    } else if (this.currentStep === 3) {
-      // Allow moving past Step 3 even without attachments, but raise alert feedback if needed
-      // For real projects we allow empty uploads, but let's check it. Let's make at least 1 file optional but notify if wanted.
-      // The prompt says "A functional file picker interface block labeled 'Upload Site Blueprints/Photos'". No hard rule requiring it, but let's allow proceeding.
     }
 
     return isValid;
@@ -332,37 +327,29 @@ export default class BookingWizardPage {
     const gpsTextArea = document.getElementById('booking-gps');
     
     this.btnFetchGps.disabled = true;
-    this.btnFetchGps.innerHTML = '<span style="border: 2px solid #FFF; border-top: 2px solid transparent; width:12px; height:12px; border-radius:50%; display:inline-block; animation: spin 1s infinite linear; margin-right:6px;"></span> Fetching GPS...';
+    this.btnFetchGps.innerHTML = '<span style="border: 2px solid currentColor; border-top: 2px solid transparent; width:14px; height:14px; border-radius:50%; display:inline-block; animation: spin 1s infinite linear; margin-right:6px;"></span> Getting location...';
     
     statusDiv.style.display = 'block';
     statusDiv.style.color = 'var(--color-text-tertiary)';
-    statusDiv.textContent = 'Accessing device location API...';
-
-    // CSS spin keyframe inject dynamically if not in file
-    if (!document.getElementById('dynamic-spin-css')) {
-      const style = document.createElement('style');
-      style.id = 'dynamic-spin-css';
-      style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-      document.head.appendChild(style);
-    }
+    statusDiv.textContent = 'Accessing your device GPS...';
 
     try {
-      const location = await fetchMockLocation();
+      const location = await fetchRealLocation();
       gpsTextArea.value = `${location.address}\n(GPS: ${location.latitude}, ${location.longitude})`;
       gpsTextArea.classList.remove('is-invalid');
       document.getElementById('booking-gps-feedback').classList.remove('is-error');
       
       statusDiv.style.color = 'var(--color-success)';
-      statusDiv.textContent = `Coordinates locked: ${location.latitude}, ${location.longitude}`;
+      statusDiv.textContent = `✓ Location locked: ${parseFloat(location.latitude).toFixed(4)}, ${parseFloat(location.longitude).toFixed(4)}`;
       
-      this.formData.gpsCoordinates = { lat: location.latitude, lng: location.longitude };
+      this.formData.gpsCoordinates = { lat: parseFloat(location.latitude), lng: parseFloat(location.longitude) };
       this.formData.gpsLocation = gpsTextArea.value;
     } catch (err) {
       statusDiv.style.color = 'var(--color-danger)';
-      statusDiv.textContent = 'Failed to lock location. Please type manually.';
+      statusDiv.textContent = `⚠ ${err.message} Type address manually above.`;
     } finally {
       this.btnFetchGps.disabled = false;
-      this.btnFetchGps.innerHTML = '<i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> Fetch Current GPS Location';
+      this.btnFetchGps.innerHTML = '<i data-lucide="map-pin" style="width: 16px; height: 16px;"></i> Use My Current Location';
       if (window.lucide) window.lucide.createIcons();
     }
   }
@@ -371,7 +358,6 @@ export default class BookingWizardPage {
     const files = Array.from(e.target.files);
     
     files.forEach(file => {
-      // Format file size
       const sizeKB = (file.size / 1024).toFixed(1);
       this.uploadedFiles.push({
         id: 'file-' + Date.now() + Math.random().toString(36).substring(2, 5),
@@ -412,7 +398,6 @@ export default class BookingWizardPage {
       </div>
     `).join('');
 
-    // Rebind remove buttons
     listContainer.querySelectorAll('.btn-remove-file').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const fileId = e.currentTarget.getAttribute('data-id');
@@ -423,14 +408,18 @@ export default class BookingWizardPage {
     if (window.lucide) window.lucide.createIcons();
   }
 
-  submitBooking() {
-    // Generate tracker reference
+  async submitBooking() {
+    // Show loading state on button
+    const btn = this.btnNext;
+    btn.innerHTML = '<span style="border:2px solid white;border-top-color:transparent;width:16px;height:16px;border-radius:50%;display:inline-block;animation:spin 1s linear infinite;margin-right:8px;"></span>Saving...';
+    btn.disabled = true;
+
     const trackerId = generateTrackingId();
     const serviceDetails = services.find(s => s.id === this.formData.serviceId);
+    const state = store.getState();
 
-    // Create a new booking object
-    const newBooking = {
-      id: trackerId,
+    const bookingData = {
+      trackerId,
       serviceId: this.formData.serviceId,
       serviceName: serviceDetails ? serviceDetails.title : 'Engineering Work',
       clientName: this.formData.name,
@@ -438,38 +427,28 @@ export default class BookingWizardPage {
       date: this.formData.date,
       time: this.formData.time,
       location: this.formData.gpsLocation,
+      gpsCoordinates: this.formData.gpsCoordinates || null,
       status: 'Approved',
       statusIndex: 0,
-      engineer: {
-        name: 'Engr. Ahmed Khan',
-        role: 'Senior Project Engineer',
-        phone: '+923004545280',
-        avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&auto=format&fit=crop&q=80'
-      },
-      gpsAddress: this.formData.gpsLocation,
-      createdDate: new Date().toISOString()
+      userId: state.user ? state.user.uid : null,
+      userEmail: state.user ? state.user.email : null,
+      attachments: this.uploadedFiles.map(f => f.name),
+      createdAt: serverTimestamp()
     };
 
-    // Save back to store
-    const state = store.getState();
-    const activeBookings = state.bookings || [];
-    activeBookings.unshift(newBooking); // Add new booking to top of list
-    store.setState('bookings', activeBookings);
+    try {
+      // Save to Firestore
+      await addDoc(collection(db, 'bookings'), bookingData);
+    } catch (firestoreErr) {
+      console.warn('Firestore save failed, saving locally:', firestoreErr.message);
+      // Fallback: save to store if offline
+      const activeBookings = state.bookings || [];
+      activeBookings.unshift({ ...bookingData, id: trackerId, createdAt: new Date() });
+      store.setState('bookings', activeBookings);
+    }
 
-    // Trigger Success Notification Alert
-    const notificationsList = state.notifications || [];
-    notificationsList.unshift({
-      id: 'n-' + Date.now(),
-      title: 'New Service Request',
-      message: `Your booking for "${newBooking.serviceName}" has been successfully logged with reference ${trackerId}.`,
-      timestamp: new Date().toISOString(),
-      type: 'success',
-      read: false
-    });
-    store.setState('notifications', notificationsList);
-
-    // Show Success Overlay
-    document.getElementById('success-tracker-id').textContent = trackerId;
+    // Show success screen
+    document.getElementById('success-tracker-id').textContent = '#' + trackerId;
     this.successOverlay.style.display = 'flex';
     if (window.lucide) window.lucide.createIcons();
   }

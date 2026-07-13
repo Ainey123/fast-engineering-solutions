@@ -14,7 +14,7 @@ export function isValidPassword(password) {
 // Generate unique tracking IDs for bookings
 export function generateTrackingId() {
   const randomNum = Math.floor(1000 + Math.random() * 9000);
-  return `#FES-${randomNum}`;
+  return `FES-${randomNum}`;
 }
 
 // Format relative time (e.g., "2m ago", "3h ago", "1d ago")
@@ -40,41 +40,70 @@ export function cleanPhoneNumber(phone) {
   return phone.replace(/\D/g, '');
 }
 
-// Mock GPS Location fetcher with delay
-export function fetchMockLocation() {
+/**
+ * Real GPS Location fetcher using browser Geolocation API
+ * Then does reverse geocoding via OpenStreetMap Nominatim (free, no API key needed)
+ */
+export function fetchRealLocation() {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
-      // Return a simulated high-quality coordinate if API is missing
-      setTimeout(() => {
-        resolve({
-          latitude: 31.5204,
-          longitude: 74.3587,
-          address: 'Gulberg III, Lahore, Pakistan'
-        });
-      }, 1200);
+      reject(new Error('Geolocation is not supported by this browser.'));
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        // Reverse geocoding placeholder
-        resolve({
-          latitude: position.coords.latitude.toFixed(4),
-          longitude: position.coords.longitude.toFixed(4),
-          address: 'Fetched via browser GPS'
-        });
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        try {
+          // Free reverse geocoding via OpenStreetMap Nominatim
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          const data = await response.json();
+
+          // Build a clean readable address
+          const addr = data.address || {};
+          const parts = [
+            addr.house_number,
+            addr.road,
+            addr.neighbourhood || addr.suburb,
+            addr.city || addr.town || addr.village,
+            addr.state,
+            addr.country
+          ].filter(Boolean);
+
+          resolve({
+            latitude: lat.toFixed(6),
+            longitude: lng.toFixed(6),
+            address: parts.length > 0 ? parts.join(', ') : data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+          });
+        } catch (err) {
+          // Reverse geocoding failed but we still have coordinates
+          resolve({
+            latitude: lat.toFixed(6),
+            longitude: lng.toFixed(6),
+            address: `${lat.toFixed(4)}, ${lng.toFixed(4)}`
+          });
+        }
       },
       (error) => {
-        // Fallback mock if user denies permission
-        setTimeout(() => {
-          resolve({
-            latitude: 31.4805,
-            longitude: 74.3210,
-            address: 'Model Town, Lahore, Pakistan (Simulated)'
-          });
-        }, 1000);
+        let msg = 'Location access denied.';
+        if (error.code === 1) msg = 'Location permission denied. Please allow location access in your browser settings.';
+        else if (error.code === 2) msg = 'Location unavailable. Check your device GPS.';
+        else if (error.code === 3) msg = 'Location request timed out. Please try again.';
+        reject(new Error(msg));
       },
-      { timeout: 5000 }
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
     );
   });
 }
+
+// Keep old name as alias for backward compatibility
+export const fetchMockLocation = fetchRealLocation;
