@@ -92,6 +92,20 @@ class HashRouter {
       return;
     }
 
+    // Route Aliases
+    if (hash === '#/orders') {
+      this.navigate('#/bookings');
+      return;
+    }
+    if (hash === '#/messages') {
+      this.navigate('#/support');
+      return;
+    }
+    if (hash === '#/wallet') {
+      this.navigate('#/profile');
+      return;
+    }
+
     // Route matching
     let match = null;
     let matchedRoute = null;

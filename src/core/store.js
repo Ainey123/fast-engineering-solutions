@@ -31,7 +31,7 @@ class GlobalStore {
           try {
             const rolePromise = getDoc(doc(db, 'users', firebaseUser.uid));
             const timeoutPromise = new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Firestore timeout')), 5000)
+              setTimeout(() => reject(new Error('Firestore timeout')), 10000)
             );
             const userDoc = await Promise.race([rolePromise, timeoutPromise]);
             if (userDoc && userDoc.exists()) {
