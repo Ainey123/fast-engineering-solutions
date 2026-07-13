@@ -34,6 +34,25 @@ export default class ProfilePage {
           </div>
         </div>
 
+        <!-- Wallet Section -->
+        <div class="card" style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, var(--color-primary) 0%, #0052cc 100%); color: white; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 102, 255, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="wallet" style="width: 20px; height: 20px; opacity: 0.9;"></i>
+              <span style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">FES Wallet</span>
+            </div>
+            <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;">Active</span>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 2px;">Available Credit</div>
+            <div style="font-size: 2rem; font-weight: 800; letter-spacing: -1px;">PKR 0.00</div>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 16px;">
+            <button class="btn btn-sm" style="flex: 1; background: white; color: var(--color-primary); border: none; font-weight: 700;">Add Funds</button>
+            <button class="btn btn-sm" style="flex: 1; background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); font-weight: 600;">History</button>
+          </div>
+        </div>
+
         <!-- Settings Cards Group -->
         <h3 style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; margin-bottom: 12px; padding-left: 4px;">Account Settings</h3>
         

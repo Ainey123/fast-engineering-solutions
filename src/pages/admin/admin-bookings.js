@@ -37,9 +37,9 @@ export default class AdminBookingsPage {
         
         <!-- Filter Tabs -->
         <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;">
-          ${['all','pending','in-progress','completed'].map(f => `
+          ${['All', 'Approved', 'Dispatched', 'In Progress', 'Completed'].map(f => `
             <button class="filter-tab ${this.filter === f ? 'active' : ''}" data-filter="${f}" 
-              style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid var(--color-surface-border);background:${this.filter === f ? 'var(--color-primary)' : 'var(--color-surface)'};color:${this.filter === f ? 'white' : 'var(--color-text-secondary)'};font-size:0.775rem;font-weight:600;cursor:pointer;text-transform:capitalize;">
+              style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1px solid var(--color-surface-border);background:${this.filter === f ? 'var(--color-primary)' : 'var(--color-surface)'};color:${this.filter === f ? 'white' : 'var(--color-text-secondary)'};font-size:0.775rem;font-weight:600;cursor:pointer;">
               ${f}
             </button>`).join('')}
         </div>
@@ -53,7 +53,7 @@ export default class AdminBookingsPage {
   }
 
   renderBookingsList(bookings) {
-    const filtered = this.filter === 'all' ? bookings : bookings.filter(b => b.status === this.filter);
+    const filtered = this.filter === 'All' || this.filter === 'all' ? bookings : bookings.filter(b => b.status === this.filter);
     
     if (filtered.length === 0) {
       return `<div style="text-align:center;padding:48px 24px;color:var(--color-text-tertiary);">
@@ -63,7 +63,7 @@ export default class AdminBookingsPage {
     }
 
     return filtered.map(b => {
-      const statusColor = b.status === 'completed' ? 'var(--color-success)' : b.status === 'in-progress' ? 'var(--color-primary)' : b.status === 'pending' ? 'var(--color-secondary)' : 'var(--color-text-tertiary)';
+      const statusColor = b.status === 'Completed' ? 'var(--color-success)' : b.status === 'In Progress' ? 'var(--color-primary)' : b.status === 'Dispatched' ? 'var(--color-secondary)' : 'var(--color-text-tertiary)';
       const date = b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-PK', { day:'numeric', month:'short', year:'numeric' }) : 'N/A';
       return `
         <div class="card" style="margin-bottom:10px;padding:14px;">
@@ -79,17 +79,21 @@ export default class AdminBookingsPage {
           ${b.notes ? `<div style="font-size:0.8rem;color:var(--color-text-secondary);margin-bottom:10px;padding:8px;background:var(--color-bg-page);border-radius:8px;">"${b.notes}"</div>` : ''}
           <!-- Status Update Buttons -->
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="update-status" data-id="${b.id}" data-status="pending" 
-              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='pending'?'var(--color-secondary)':'var(--color-surface)'};color:${b.status==='pending'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
-              Pending
+            <button class="update-status" data-id="${b.id}" data-status="Approved" data-index="0"
+              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='Approved'?'var(--color-text-tertiary)':'var(--color-surface)'};color:${b.status==='Approved'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
+              Approve
             </button>
-            <button class="update-status" data-id="${b.id}" data-status="in-progress"
-              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='in-progress'?'var(--color-primary)':'var(--color-surface)'};color:${b.status==='in-progress'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
+            <button class="update-status" data-id="${b.id}" data-status="Dispatched" data-index="1"
+              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='Dispatched'?'var(--color-secondary)':'var(--color-surface)'};color:${b.status==='Dispatched'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
+              Dispatch
+            </button>
+            <button class="update-status" data-id="${b.id}" data-status="In Progress" data-index="2"
+              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='In Progress'?'var(--color-primary)':'var(--color-surface)'};color:${b.status==='In Progress'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
               In Progress
             </button>
-            <button class="update-status" data-id="${b.id}" data-status="completed"
-              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='completed'?'var(--color-success)':'var(--color-surface)'};color:${b.status==='completed'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
-              Completed
+            <button class="update-status" data-id="${b.id}" data-status="Completed" data-index="3"
+              style="flex:1;min-width:70px;padding:6px;border-radius:8px;border:1px solid var(--color-surface-border);background:${b.status==='Completed'?'var(--color-success)':'var(--color-surface)'};color:${b.status==='Completed'?'white':'var(--color-text-secondary)'};font-size:0.725rem;font-weight:600;cursor:pointer;">
+              Complete
             </button>
           </div>
         </div>`;
@@ -123,11 +127,18 @@ export default class AdminBookingsPage {
       btn.addEventListener('click', async (e) => {
         const bookingId = e.currentTarget.getAttribute('data-id');
         const newStatus = e.currentTarget.getAttribute('data-status');
-        btn.textContent = 'Saving...';
+        const newIndex = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+        btn.textContent = '...';
         try {
-          await updateDoc(doc(db, 'bookings', bookingId), { status: newStatus });
+          await updateDoc(doc(db, 'bookings', bookingId), { 
+            status: newStatus,
+            statusIndex: newIndex
+          });
           const idx = this.bookings.findIndex(b => b.id === bookingId);
-          if (idx !== -1) this.bookings[idx].status = newStatus;
+          if (idx !== -1) {
+            this.bookings[idx].status = newStatus;
+            this.bookings[idx].statusIndex = newIndex;
+          }
           const list = document.getElementById('bookings-list');
           if (list) list.innerHTML = this.renderBookingsList(this.bookings);
           if (window.lucide) window.lucide.createIcons();

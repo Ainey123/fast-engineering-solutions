@@ -29,30 +29,58 @@ export default class SupportPage {
 
       <div class="app-view-container no-scrollbar" style="padding: 16px 16px 88px;">
         
+        <!-- Fast Engineering Details Banner -->
+        <div class="card" style="margin-bottom: 24px; padding: 16px; background-color: var(--color-surface-hover); border: 1px solid var(--color-primary); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: -10px; right: -10px; opacity: 0.05;">
+            <i data-lucide="settings" style="width: 100px; height: 100px;"></i>
+          </div>
+          <h2 style="font-size: 1.1rem; font-weight: 800; color: var(--color-primary); margin-bottom: 6px;">Fast Engineering Solutions</h2>
+          <p style="font-size: 0.85rem; color: var(--color-text-secondary); line-height: 1.4; margin-bottom: 12px;">
+            Located in Lahore, we provide comprehensive construction, electrical, and facility management services. We handle everything from designing and building commercial/residential spaces to emergency electrical repairs.
+          </p>
+          <div style="font-size: 0.75rem; font-weight: 600; color: var(--color-text-tertiary); margin-bottom: 4px;">KEY SERVICES:</div>
+          <ul style="font-size: 0.8rem; color: var(--color-text-secondary); padding-left: 16px; margin: 0 0 12px 0;">
+            <li style="margin-bottom: 4px;"><b>Construction & Renovation:</b> Banks, villas, commercial complexes, warehouses.</li>
+            <li style="margin-bottom: 4px;"><b>Electrical Work:</b> Industrial/commercial electrification, solar/generator integration.</li>
+            <li><b>Facility Management:</b> Furnished workspaces, cafe management, security products.</li>
+          </ul>
+        </div>
+
         <!-- Contact Action Cards -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px;">
           
           <!-- Call hotline card -->
-          <a href="tel:+923004545280" class="card active-press" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 20px;">
-            <div style="width: 48px; height: 48px; border-radius: 50%; background-color: var(--color-accent-blue-tint); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="phone" style="width: 22px; height: 22px;"></i>
+          <a href="tel:+923004545280" class="card active-press" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background-color: var(--color-accent-blue-tint); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="phone" style="width: 20px; height: 20px;"></i>
             </div>
             <div>
-              <h3 style="font-size: 0.9rem; font-weight: 700;">Voice Hotline</h3>
-              <p style="font-size: 0.7rem; color: var(--color-text-tertiary); margin-top: 2px;">Direct dialing</p>
+              <h3 style="font-size: 0.85rem; font-weight: 700;">Voice Hotline</h3>
+              <p style="font-size: 0.7rem; color: var(--color-text-tertiary); margin-top: 2px;">+92 300 4545280</p>
             </div>
           </a>
 
           <!-- WhatsApp hotline card -->
-          <button id="btn-support-wa" class="card active-press" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 20px; background: none; border: 1px solid var(--color-surface-border); width: 100%;">
-            <div style="width: 48px; height: 48px; border-radius: 50%; background-color: rgba(37, 211, 102, 0.1); color: #25D366; display: flex; align-items: center; justify-content: center;">
-              <i data-lucide="message-square" style="width: 22px; height: 22px;"></i>
+          <button id="btn-support-wa" class="card active-press" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 16px; background: none; border: 1px solid var(--color-surface-border); width: 100%;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background-color: rgba(37, 211, 102, 0.1); color: #25D366; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="message-square" style="width: 20px; height: 20px;"></i>
             </div>
             <div>
-              <h3 style="font-size: 0.9rem; font-weight: 700;">WhatsApp Desk</h3>
-              <p style="font-size: 0.7rem; color: var(--color-text-tertiary); margin-top: 2px;">Chat with operations</p>
+              <h3 style="font-size: 0.85rem; font-weight: 700;">WhatsApp</h3>
+              <p style="font-size: 0.7rem; color: var(--color-text-tertiary); margin-top: 2px;">+92 326 4545222</p>
             </div>
           </button>
+          
+          <!-- Gmail card -->
+          <a href="mailto:fastsales.services@gmail.com" class="card active-press" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 16px; grid-column: span 2;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background-color: rgba(234, 67, 53, 0.1); color: #EA4335; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="mail" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div>
+              <h3 style="font-size: 0.85rem; font-weight: 700;">Email Support</h3>
+              <p style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 2px;">fastsales.services@gmail.com</p>
+            </div>
+          </a>
 
         </div>
 
@@ -131,7 +159,7 @@ export default class SupportPage {
 
     // WhatsApp Desk Click
     this.btnSupportWa.addEventListener('click', () => {
-      const waNumber = '923004545280';
+      const waNumber = '923264545222';
       const text = encodeURIComponent('Hi Fast Engineering Support, I need assistance regarding an ongoing project.');
       window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
     });
